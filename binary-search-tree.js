@@ -129,11 +129,15 @@ class Tree {
 				current = null;
 				return current;
 			} else {
-				// console.log(children);
+				// handle 2 children
 				if (children.left && children.right) {
-					// handle 2 children
+					let next = this.findNext(current.right);
+					console.log(next, children.left, children.right);
+					children.right.left = null;
+					next.left = children.left;
+					next.right = children.right;
+					current = next;
 				} else if (children.left && !children.right) {
-					// console.log(children);
 					if (parent.right.data == value) {
 						parent.right = children.left;
 						current = children.left;
@@ -143,7 +147,6 @@ class Tree {
 					}
 				} else if (!children.left && children.right) {
 					if (parent.right.data == value) {
-						// parent.right = children.right;
 						current = children.right;
 					} else if (parent.left.data == value) {
 						parent.left = children.right;
@@ -176,10 +179,19 @@ class Tree {
 					children.right = target.right;
 				}
 				if (target.left) {
-					children.left = target.right;
+					children.left = target.left;
 				}
 			}
 			current.right = this.reDelete(current.right, value, parent, children);
+		}
+		return current;
+	}
+
+	findNext(current) {
+		if (current.left) {
+			while (current.left) {
+				current = current.left;
+			}
 		}
 		return current;
 	}
@@ -205,11 +217,10 @@ class Tree {
 
 const tree_A = new Tree(data_A);
 console.log(data_A);
-// tree_A.delete(600);
-tree_A.delete(1);
-tree_A.delete(9);
-tree_A.delete(5);
-tree_A.delete(600);
+// tree_A.delete(1);
+// tree_A.delete(9);
+// tree_A.delete(5);
+tree_A.delete(4);
 
 tree_A.prettyPrint(tree_A.root);
 // console.log(tree_A);

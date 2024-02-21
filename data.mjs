@@ -1,7 +1,7 @@
-const array_A = [1, 7, 4, 23, 8, 9, 4, 3, 5, 7, 9, 67, 600, 324];
+const array_D = [1, 7, 4, 23, 8, 9, 4, 3, 5, 7, 9, 67, 100, 600, 324];
 const array_B = [];
 const array_C = [10];
-const array_D = [1, 7, 4, 23, 8, 9, 4, 3, 68, 5, 7, 9, 67, 600, 324];
+const array_A = [1, 2, 3, 4, 5, 6, 7, 14, 10, 23, 9, 9, 67, 6, 32, 20, 31];
 
 function sortArray(arr) {
 	function compareNumbers(a, b) {
