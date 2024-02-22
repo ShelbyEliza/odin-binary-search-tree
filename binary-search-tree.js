@@ -1,22 +1,13 @@
-// import { a, b, c, d } from './data.mjs';
+import { a, b, c, d } from './data.mjs';
 
-function sortArray(arr) {
-	function compareNumbers(a, b) {
-		return a - b;
-	}
-	return arr.sort(compareNumbers);
-}
-// filter method:
-function filterOutDuplicates(arr) {
-	return arr.filter((value, index) => data.indexOf(value) === index);
-}
-// set method:
-function removeDuplicates(arr) {
-	return [...new Set(arr)];
-}
-const a = sortArray(
-	removeDuplicates([1, 7, 4, 23, 8, 9, 4, 3, 5, 7, 9, 67, 100, 600, 324])
-);
+import {
+	logEvery,
+	recurLogEvery,
+	sortArray,
+	removeDuplicates,
+} from './helper.mjs';
+
+const aSorted = sortArray(removeDuplicates(a));
 
 class Node {
 	constructor(data) {
@@ -40,6 +31,7 @@ class Tree {
 		}
 		throw new Error('Array is too short. Must be greater than 1.');
 	}
+
 	/** Cases to consider 
 	 * Empty Array:
 	if (arr.length < 1) {
@@ -220,28 +212,49 @@ class Tree {
 
 	find(value) {
 		let current = this.root;
-		current = this.recurFind(value, current);
+		return this.recurFind(value, current);
 	}
 
 	recurFind(value, current) {
 		// base case:
+		if (!current) {
+			return 'Value not found in tree.';
+		}
 		if (current.data === value) {
-			console.log(current);
 			return current;
-		}
-
-		if (current.data > value) {
-			current = this.recurFind(value, current.left);
+		} else if (current.data > value) {
+			return this.recurFind(value, current.left);
 		} else if (current.data < value) {
-			current = this.recurFind(value, current.right);
-		} else {
-			current = 'Value not found in tree.';
+			return this.recurFind(value, current.right);
 		}
-		console.log(current);
-		return current;
 	}
 
-	levelOrder(callback) {}
+	printInOrder(current, queue) {
+		let count = 0;
+		let currIndex = 0;
+		let returnArray = [current.data];
+
+		while (current) {
+			if (current.left) {
+				queue.push(current.left);
+				returnArray.push(current.left.data);
+				count++;
+			}
+			if (current.right) {
+				queue.push(current.right);
+				returnArray.push(current.right.data);
+				count++;
+			}
+			if (count == currIndex) {
+				return returnArray;
+			} else {
+				currIndex++;
+				current = queue[currIndex];
+			}
+		}
+		return queue;
+	}
+
 	inOrder(callback) {}
 	preOrder(callback) {}
 	postOrder(callback) {}
@@ -249,14 +262,37 @@ class Tree {
 	depth(node) {}
 	isBalanced() {}
 	reBalance() {}
+
+	/**
+	 *
+	 * @param {*} callback
+	 * runs callback on every node, starting at root,
+	 * adds child nodes to a queue and goes through each level
+	 */
+	levelOrder(callback) {
+		let current = this.root;
+		let queue = [];
+		if (current) {
+			queue.push(current);
+		}
+		if (callback) {
+			callback(current, queue);
+		} else {
+			return this.printInOrder(current, queue);
+		}
+	}
 }
 
-const treeA = new Tree(a);
-console.log(treeA);
-treeA.prettyPrint(treeA.root);
+const tree = new Tree(aSorted);
+console.log(tree);
+tree.prettyPrint(tree.root);
 
-// console.log(treeA.root);
-console.log(treeA.find(67));
+// tree.levelOrder(logEvery);
+// tree.levelOrder(recurLogEvery);
+// console.log(tree.levelOrder());
+
+// console.log(tree.root);
+// console.log(treeA.find(9));
 // treeA.insert(59);
 // treeA.delete(100);
 // treeA.delete(67);
