@@ -1,4 +1,22 @@
-import { data_A, data_B, data_C, data_D } from './data.mjs';
+// import { a, b, c, d } from './data.mjs';
+
+function sortArray(arr) {
+	function compareNumbers(a, b) {
+		return a - b;
+	}
+	return arr.sort(compareNumbers);
+}
+// filter method:
+function filterOutDuplicates(arr) {
+	return arr.filter((value, index) => data.indexOf(value) === index);
+}
+// set method:
+function removeDuplicates(arr) {
+	return [...new Set(arr)];
+}
+const a = sortArray(
+	removeDuplicates([1, 7, 4, 23, 8, 9, 4, 3, 5, 7, 9, 67, 100, 600, 324])
+);
 
 class Node {
 	constructor(data) {
@@ -14,6 +32,7 @@ class Tree {
 		this.lastIndex = this.findLastIndex(arr);
 		this.root = this.buildTree(arr, 0, this.lastIndex);
 	}
+
 	findLastIndex(arr) {
 		let lastIndex = arr.length - 1;
 		if (lastIndex) {
@@ -21,18 +40,17 @@ class Tree {
 		}
 		throw new Error('Array is too short. Must be greater than 1.');
 	}
+	/** Cases to consider 
+	 * Empty Array:
+	if (arr.length < 1) {
+		return null;
+	}
+	* Array of 1:
+	if (arr.length === 1) {
+		return new Node(arr[0], null, null);
+	} 
+	*/
 	buildTree(arr, startIndex, endIndex) {
-		/** Cases to consider 
-		 * Empty Array:
-		if (arr.length < 1) {
-			return null;
-		}
-		* Array of 1:
-		if (arr.length === 1) {
-			return new Node(arr[0], null, null);
-		} 
-		*/
-
 		// Base case:
 		if (startIndex > endIndex) {
 			return null;
@@ -115,12 +133,12 @@ class Tree {
 		current,
 		value,
 		parent = null,
-		children = { left: null, right: null }
+		children = { toLeft: null, toRight: null }
 	) {
-		// console.log(parent);
+		// console.log(current, parent, children);
 		if (parent) {
-			if (!children.left && !children.right) {
-				// console.log(parent);
+			// case 1: target has no children
+			if (!children.toLeft && !children.toRight) {
 				if (parent.right.data == value) {
 					parent.right = null;
 				} else if (parent.left.data == value) {
@@ -129,28 +147,32 @@ class Tree {
 				current = null;
 				return current;
 			} else {
-				// handle 2 children
-				if (children.left && children.right) {
-					let next = this.findNext(current.right);
-					console.log(next, children.left, children.right);
-					children.right.left = null;
-					next.left = children.left;
-					next.right = children.right;
-					current = next;
-				} else if (children.left && !children.right) {
-					if (parent.right.data == value) {
-						parent.right = children.left;
-						current = children.left;
-					} else if (parent.left.data == value) {
-						parent.left = children.left;
-						current = children.left;
+				// case 3: target has 2 children
+				// next is the value to the right of target then all the way left
+				if (children.toLeft && children.toRight) {
+					let next = this.findNext(children.toRight);
+
+					// console.log(parent, current, next, children.toLeft, children.toRight);
+					if (children.toRight.left) {
+						children.toRight.left = null;
 					}
-				} else if (!children.left && children.right) {
+					if (next.data !== children.toRight.data) {
+						next.right = children.toRight;
+					}
+					next.left = children.toLeft;
+					current = next;
+					// case 2: target has only 1 child
+				} else if (children.toLeft && !children.toRight) {
 					if (parent.right.data == value) {
-						current = children.right;
+						current = children.toLeft;
 					} else if (parent.left.data == value) {
-						parent.left = children.right;
-						current = children.right;
+						current = children.toLeft;
+					}
+				} else if (!children.toLeft && children.toRight) {
+					if (parent.right.data == value) {
+						current = children.toRight;
+					} else if (parent.left.data == value) {
+						current = children.toRight;
 					}
 				}
 			}
@@ -158,28 +180,28 @@ class Tree {
 		}
 
 		if (current.data > value) {
-			console.log(`${current.data} is greater than ${value}`);
-			if (current.left.data == value) {
+			// console.log(`${current.data} is greater than ${value}`);
+			if (current.left && current.left.data == value) {
 				let target = current.left;
 				parent = current;
 				if (target.left) {
-					children.left = target.left;
+					children.toLeft = target.left;
 				}
 				if (target.right) {
-					children.right = target.right;
+					children.toRight = target.right;
 				}
 			}
 			current.left = this.reDelete(current.left, value, parent, children);
 		} else if (current.data < value) {
-			console.log(`${current.data} is less than ${value}`);
+			// console.log(`${current.data} is less than ${value}`);
 			if (current.right.data == value) {
 				let target = current.right;
 				parent = current;
 				if (target.right) {
-					children.right = target.right;
+					children.toRight = target.right;
 				}
 				if (target.left) {
-					children.left = target.left;
+					children.toLeft = target.left;
 				}
 			}
 			current.right = this.reDelete(current.right, value, parent, children);
@@ -196,7 +218,29 @@ class Tree {
 		return current;
 	}
 
-	find(value) {}
+	find(value) {
+		let current = this.root;
+		current = this.recurFind(value, current);
+	}
+
+	recurFind(value, current) {
+		// base case:
+		if (current.data === value) {
+			console.log(current);
+			return current;
+		}
+
+		if (current.data > value) {
+			current = this.recurFind(value, current.left);
+		} else if (current.data < value) {
+			current = this.recurFind(value, current.right);
+		} else {
+			current = 'Value not found in tree.';
+		}
+		console.log(current);
+		return current;
+	}
+
 	levelOrder(callback) {}
 	inOrder(callback) {}
 	preOrder(callback) {}
@@ -207,22 +251,18 @@ class Tree {
 	reBalance() {}
 }
 
-// const tree_B = new Tree(data_B);
-// const tree_C = new Tree(data_C);
-// tree_B.prettyPrint(tree_B.root);
-// tree_C.prettyPrint(tree_C.root);
+const treeA = new Tree(a);
+console.log(treeA);
+treeA.prettyPrint(treeA.root);
 
-// const tree_D = new Tree(data_D);
-// tree_D.prettyPrint(tree_D.root);
+// console.log(treeA.root);
+console.log(treeA.find(67));
+// treeA.insert(59);
+// treeA.delete(100);
+// treeA.delete(67);
+// treeA.delete(4);
 
-const tree_A = new Tree(data_A);
-console.log(data_A);
-// tree_A.delete(1);
-// tree_A.delete(9);
-// tree_A.delete(5);
-tree_A.delete(4);
-
-tree_A.prettyPrint(tree_A.root);
+// treeA.prettyPrint(treeA.root);
 // console.log(tree_A);
 
 // tree_A.insert(680);
