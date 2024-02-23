@@ -1,11 +1,6 @@
 import { a, b, c, d } from './data.mjs';
 
-import {
-	logEvery,
-	recurLogEvery,
-	sortArray,
-	removeDuplicates,
-} from './helper.mjs';
+import { sortArray, removeDuplicates, logThem } from './helper.mjs';
 
 const aSorted = sortArray(removeDuplicates(a));
 
@@ -212,24 +207,23 @@ class Tree {
 
 	find(value) {
 		let current = this.root;
-		return this.recurFind(value, current);
+		function recurFind(value, current) {
+			// base case:
+			if (!current) {
+				return null;
+			}
+			if (current.data === value) {
+				return current;
+			} else if (current.data > value) {
+				return recurFind(value, current.left);
+			} else if (current.data < value) {
+				return recurFind(value, current.right);
+			}
+		}
+		return recurFind(value, current);
 	}
 
-	recurFind(value, current) {
-		// base case:
-		if (!current) {
-			return 'Value not found in tree.';
-		}
-		if (current.data === value) {
-			return current;
-		} else if (current.data > value) {
-			return this.recurFind(value, current.left);
-		} else if (current.data < value) {
-			return this.recurFind(value, current.right);
-		}
-	}
-
-	printInOrder(current, queue) {
+	printLevelOrder(current, queue) {
 		let count = 0;
 		let currIndex = 0;
 		let returnArray = [current.data];
@@ -255,40 +249,214 @@ class Tree {
 		return queue;
 	}
 
-	inOrder(callback) {}
-	preOrder(callback) {}
-	postOrder(callback) {}
-	height(node) {}
-	depth(node) {}
-	isBalanced() {}
-	reBalance() {}
+	recurLevelOrder(callback) {
+		let current = this.root;
+		let queue = [];
+		if (current) {
+			queue.push(current);
+		}
+		// no callback
+		if (!callback) {
+			return this.printLevelOrder(current, queue);
+		} else {
+			function reLevelO(current, queue, callback) {
+				// base case:
+				if (!current) {
+					return;
+				}
+				if (current.left) {
+					queue.push(current.left);
+				}
+				if (current.right) {
+					queue.push(current.right);
+				}
+				// do a thing to current here
+				callback(current);
+				if (queue.length > 0) {
+					queue.shift();
+					current = queue[0];
+					reLevelO(current, queue, callback);
+				} else {
+					current = null;
+				}
+			}
 
-	/**
-	 *
-	 * @param {*} callback
-	 * runs callback on every node, starting at root,
-	 * adds child nodes to a queue and goes through each level
-	 */
+			if (!current) {
+				return;
+			}
+			return reLevelO(current, queue, callback);
+		}
+	}
+
 	levelOrder(callback) {
 		let current = this.root;
 		let queue = [];
 		if (current) {
 			queue.push(current);
 		}
-		if (callback) {
-			callback(current, queue);
+		// no callback
+		if (!callback) {
+			return this.printLevelOrder(current, queue);
 		} else {
-			return this.printInOrder(current, queue);
+			while (current) {
+				if (current.left) {
+					queue.push(current.left);
+				}
+				if (current.right) {
+					queue.push(current.right);
+				}
+				callback(current);
+				if (queue.length > 0) {
+					queue.shift();
+					current = queue[0];
+				}
+			}
 		}
 	}
+
+	inOrder(callback) {
+		let current = this.root;
+		let stack = [];
+		if (current) {
+			function recurInOrder(current) {
+				if (!current) {
+					return;
+				}
+				if (current.left) {
+					recurInOrder(current.left);
+				}
+				if (callback) {
+					callback(current);
+				} else {
+					stack.push(current.data);
+				}
+				if (current.right) {
+					recurInOrder(current.right);
+				}
+			}
+			recurInOrder(current, callback);
+			if (!callback) {
+				return stack;
+			}
+			return;
+		}
+	}
+
+	preOrder(callback) {
+		let current = this.root;
+		let stack = [];
+		if (current) {
+			function recurPreOrder(current) {
+				if (!current) {
+					return;
+				}
+				if (callback) {
+					callback(current);
+				} else {
+					stack.push(current.data);
+				}
+				if (current.left) {
+					recurPreOrder(current.left);
+				}
+				if (current.right) {
+					recurPreOrder(current.right);
+				}
+			}
+			recurPreOrder(current, callback);
+			if (!callback) {
+				return stack;
+			}
+			return;
+		}
+	}
+
+	postOrder(callback) {
+		let current = this.root;
+		let stack = [];
+		if (current) {
+			function recurPostOrder(current) {
+				if (!current) {
+					return;
+				}
+				if (current.left) {
+					recurPostOrder(current.left);
+				}
+				if (current.right) {
+					recurPostOrder(current.right);
+				}
+				if (callback) {
+					callback(current);
+				} else {
+					stack.push(current.data);
+				}
+			}
+			recurPostOrder(current, callback);
+			if (!callback) {
+				return stack;
+			}
+			return;
+		}
+	}
+
+	height(value) {
+		let curr = this.find(value);
+		let height = 0;
+
+		if (curr) {
+			function getHeight(current) {
+				if (!current) {
+					return;
+				}
+				if (current.left) {
+					height++;
+					getHeight(current.left);
+				} else if (current.right) {
+					height++;
+					getHeight(current.right);
+				}
+			}
+			getHeight(curr);
+			return height;
+		}
+		return null;
+	}
+
+	depth(value) {
+		let curr = this.root;
+		let depth = 0;
+
+		if (curr) {
+			function getDepth(current) {
+				if (current.data === value) {
+					return depth;
+				} else if (current.left && value < current.data) {
+					depth++;
+					return getDepth(current.left);
+				} else if (current.right && value > current.data) {
+					depth++;
+					return getDepth(current.right);
+				}
+				return null;
+			}
+			return getDepth(curr);
+		} else {
+			return null;
+		}
+	}
+
+	isBalanced() {}
+	reBalance() {}
 }
 
 const tree = new Tree(aSorted);
 console.log(tree);
 tree.prettyPrint(tree.root);
 
-// tree.levelOrder(logEvery);
-// tree.levelOrder(recurLogEvery);
+console.log(tree.depth(100));
+// console.log(tree.find(600));
+
+// tree.levelOrder(logThem);
+// console.log(tree.postOrder());
 // console.log(tree.levelOrder());
 
 // console.log(tree.root);
