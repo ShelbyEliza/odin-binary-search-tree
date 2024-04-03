@@ -11,5 +11,5 @@ export function removeDuplicates(arr) {
 }
 
 export function logThem(value) {
-	console.log(value);
+	console.log(this);
 }

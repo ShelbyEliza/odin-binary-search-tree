@@ -1,9 +1,9 @@
-import { a, b, c, d } from './data.mjs';
+// import { a, b, c, d } from './data.mjs';
 
 import { sortArray, removeDuplicates, logThem } from './helper.mjs';
 
-const aSorted = sortArray(removeDuplicates(a));
-const cSorted = sortArray(removeDuplicates(c));
+// const aSorted = sortArray(removeDuplicates(a));
+// const cSorted = sortArray(removeDuplicates(c));
 
 class Node {
 	constructor(data) {
@@ -13,7 +13,7 @@ class Node {
 	}
 }
 
-class Tree {
+export class Tree {
 	constructor(arr) {
 		this.arr = arr;
 		this.lastIndex = this.findLastIndex(arr);
@@ -262,6 +262,45 @@ class Tree {
 		return queue;
 	}
 
+	iterativeLevelOrder(callback) {
+		let current = this.root;
+		let queue = [];
+		let returnVal = [];
+		// let countLeft = 0;
+		// let countRight = 0;
+
+		if (current) {
+			queue.push(current);
+			// no callback
+			if (!callback && current) {
+				return this.printLevelOrder(current, queue);
+			} else {
+				while (queue.length > 0) {
+					// console.log(current);
+					// returnVal.push({
+					// 	callbackVal: callback(current),
+					// 	countLeft: countLeft,
+					// 	countRight: countRight,
+					// });
+					returnVal.push(callback(current));
+					if (current.left) {
+						// countLeft++;
+						queue.push(current.left);
+					}
+					if (current.right) {
+						// countRight++;
+						queue.push(current.right);
+					}
+					queue.shift();
+					current = queue[0];
+				}
+				return returnVal;
+			}
+		} else {
+			return returnVal;
+		}
+	}
+
 	recurLevelOrder(callback) {
 		let current = this.root;
 		let queue = [];
@@ -295,9 +334,9 @@ class Tree {
 				}
 			}
 
-			if (!current) {
-				return;
-			}
+			// if (!current) {
+			// 	return;
+			// }
 			return reLevelO(current, queue, callback);
 		}
 	}
@@ -413,16 +452,18 @@ class Tree {
 	}
 
 	height(value) {
-		console.log(value);
-		let start = this.find(value);
+		let start;
 		let height = 0;
+		let allHeights = [];
+
+		if (value && typeof value === 'number') {
+			start = this.find(value);
+		} else {
+			start = value;
+		}
 
 		if (start) {
 			function getHeight(current) {
-				console.log(current);
-				if (!current) {
-					return;
-				}
 				if (current.left) {
 					height++;
 					getHeight(current.left);
@@ -430,16 +471,23 @@ class Tree {
 					height++;
 					getHeight(current.right);
 				}
+
+				allHeights.push(height);
+				return height;
 			}
-			getHeight(start);
-			return height;
+
+			let returnVal = getHeight(start);
+			// console.log(allHeights);
+			// return height;
 		}
-		return null;
+		// console.log(allHeights);
+		return height;
 	}
 
 	depth(value) {
 		let start = this.root;
 		let depth = 0;
+		console.log(start);
 
 		if (start) {
 			function getDepth(current) {
@@ -452,7 +500,7 @@ class Tree {
 					depth++;
 					return getDepth(current.right);
 				}
-				return null;
+				return depth;
 			}
 			return getDepth(start);
 		} else {
@@ -461,29 +509,48 @@ class Tree {
 	}
 
 	isBalanced() {
-		// let leftH;
-		// let rightH;
-		// let myThis = this;
-		// let heights = this.recurLevelOrder(myThis.height.bind(this));
-		// console.log(heights);
+		let heights = this.iterativeLevelOrder(this.depth.bind(this));
+		console.log(heights);
+		let diffList = removeDuplicates(heights);
+		console.log(diffList);
+		let newList = [];
+
+		function count(arr, element) {
+			return arr.filter((ele) => ele == element).length;
+		}
+		diffList.forEach((item) => {
+			newList.push({ height: item, count: count(heights, item) });
+		});
+		console.log(newList);
 	}
 	reBalance() {}
 }
 
+/**
+ * 
 const tree = new Tree(aSorted);
 // const treeC = new Tree(cSorted);
 console.log(tree);
 tree.prettyPrint(tree.root);
-
-// tree.delete(9);
+// tree.delete(1);
 // tree.delete(3);
-// tree.insert(102);
+// tree.delete(5);
+// tree.delete(7);
 
-// console.log(tree.levelOrder(height.bind()));
+tree.insert(102);
+tree.insert(104);
+tree.insert(601);
+// console.log(tree.height(8));
+console.log(tree.depth(104));
+
+tree.prettyPrint(tree.root);
+
+// console.log(tree.iterativeLevelOrder(tree.height.bind(tree)));
+tree.isBalanced();
+ */
+
+// tree.levelOrder(logThem.bind(tree));
 // console.log(tree.isBalanced());
-// treeC.delete(2);
-// treeC.delete(6);
-// treeC.delete(7);
 
 // tree.prettyPrint(tree.root);
 
